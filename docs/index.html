@@ -108,12 +108,13 @@
   /* Toggle buttons */
   .toggle-btn {
     background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 8px; width: 36px; height: 36px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; height: 36px; padding: 0 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
     color: var(--text-muted); transition: all .2s;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
   }
   .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .toggle-btn svg { width: 16px; height: 16px; }
+  .toggle-btn svg { width: 14px; height: 14px; }
 
   .nav-cta {
     background: var(--accent) !important; color: #fff !important;
@@ -124,7 +125,7 @@
 
   /* ---- Hero ---- */
   .hero { padding: 160px 0 100px; text-align: center; }
-  .hero-logo { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 32px; }
+  .hero-logo { width: 160px; height: 160px; border-radius: 24px; margin-bottom: 32px; }
   .hero h1 {
     font-size: 56px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1;
     margin-bottom: 20px;
@@ -207,6 +208,61 @@
     display: flex; align-items: flex-end; gap: 6px;
   }
   .mock-bar { flex: 1; border-radius: 4px 4px 0 0; min-height: 12px; }
+
+  /* ---- Carousel ---- */
+  .carousel-dots {
+    display: flex; gap: 6px; justify-content: center; margin-top: 20px;
+  }
+  .carousel-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); transition: all .3s; cursor: pointer;
+  }
+  .carousel-dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
+  .mock-content { position: relative; overflow: hidden; }
+  .carousel-slide {
+    position: absolute; inset: 0; padding: 24px;
+    opacity: 0; transition: opacity .5s ease;
+    display: flex; flex-direction: column;
+  }
+  .carousel-slide.active { opacity: 1; }
+  .mock-list-item {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mock-list-label { font-size: 12px; color: var(--text); font-weight: 500; }
+  .mock-list-sub { font-size: 10px; color: var(--text-muted); }
+  .mock-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .mock-toggle {
+    width: 32px; height: 18px; border-radius: 9px; position: relative;
+  }
+  .mock-toggle::after {
+    content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; top: 2px;
+  }
+  .mock-toggle.on { background: var(--green); }
+  .mock-toggle.on::after { right: 2px; }
+  .mock-toggle.off { background: var(--border); }
+  .mock-toggle.off::after { left: 2px; }
+  .mock-msg {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+  }
+  .mock-msg-role { font-size: 10px; font-weight: 600; margin-bottom: 4px; }
+  .mock-msg-text { font-size: 11px; color: var(--text-muted); }
+  .mock-code {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; font-family: monospace;
+    font-size: 11px; color: var(--text-muted); line-height: 1.6;
+  }
+  .mock-heatmap {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px;
+  }
+  .mock-heat-cell {
+    aspect-ratio: 1; border-radius: 2px; background: var(--border);
+  }
 
   /* ---- Features ---- */
   .features { padding: 100px 0; }
@@ -304,7 +360,7 @@
   <div class="nav-inner">
     <a href="#" class="nav-brand">
       <img src="logo.png" alt="CC">
-      <span>CC CONFIG UI</span>
+      <span>CC <span style="color:#f97316">CONFIG</span> UI</span>
     </a>
     <div class="nav-right">
       <div class="nav-links">
@@ -314,6 +370,7 @@
       <!-- Language toggle -->
       <button class="toggle-btn" id="langToggle" title="Switch language" onclick="toggleLang()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span id="langLabel">EN</span>
       </button>
       <!-- Theme toggle -->
       <button class="toggle-btn" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">
@@ -331,7 +388,7 @@
 <section class="hero">
   <div class="container">
     <img src="logo.png" alt="CC CONFIG UI" class="hero-logo fade-up">
-    <h1 class="fade-up delay-1">CC CONFIG UI</h1>
+    <h1 class="fade-up delay-1">CC <span style="-webkit-text-fill-color:#f97316">CONFIG</span> UI</h1>
     <p class="fade-up delay-2" data-i18n="hero.desc">A lightweight, zero-dependency web UI for managing your Claude Code configuration. One Python file, one HTML file, clone and run.</p>
     <div class="hero-buttons fade-up delay-3">
       <a href="#quickstart" class="btn-primary" data-i18n="hero.getStarted">
@@ -352,7 +409,7 @@
   </div>
 </section>
 
-<!-- Screenshot Mockup -->
+<!-- Screenshot Mockup (Auto-carousel) -->
 <section class="screenshot-section">
   <div class="container">
     <div class="screenshot-wrapper">
@@ -363,54 +420,157 @@
         <div class="screenshot-url">127.0.0.1:8787</div>
       </div>
       <div class="screenshot-body">
-        <div class="mock-sidebar">
+        <div class="mock-sidebar" id="mockSidebar">
           <div class="mock-sidebar-brand">
             <img src="logo.png" alt="CC">
             <span>CC CONFIG UI</span>
           </div>
-          <div class="mock-nav-item active"><div class="mock-nav-icon"></div> Dashboard</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Plugins</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Sessions</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Config</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> MCP</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Skills</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Cleanup</div>
-          <div class="mock-nav-item"><div class="mock-nav-icon"></div> System</div>
+          <div class="mock-nav-item active" data-page="0"><div class="mock-nav-icon"></div> Dashboard</div>
+          <div class="mock-nav-item" data-page="1"><div class="mock-nav-icon"></div> Plugins</div>
+          <div class="mock-nav-item" data-page="2"><div class="mock-nav-icon"></div> Sessions</div>
+          <div class="mock-nav-item" data-page="3"><div class="mock-nav-icon"></div> Config</div>
+          <div class="mock-nav-item" data-page="4"><div class="mock-nav-icon"></div> MCP</div>
+          <div class="mock-nav-item" data-page="5"><div class="mock-nav-icon"></div> Skills</div>
+          <div class="mock-nav-item" data-page="6"><div class="mock-nav-icon"></div> Cleanup</div>
+          <div class="mock-nav-item" data-page="7"><div class="mock-nav-icon"></div> System</div>
         </div>
-        <div class="mock-content">
-          <div class="mock-stat-row">
-            <div class="mock-stat">
-              <div class="mock-stat-label">PLUGINS</div>
-              <div class="mock-stat-value" style="color:var(--accent)">37</div>
+        <div class="mock-content" id="mockContent">
+
+          <!-- Slide 0: Dashboard -->
+          <div class="carousel-slide active" data-slide="0">
+            <div class="mock-stat-row">
+              <div class="mock-stat"><div class="mock-stat-label">PLUGINS</div><div class="mock-stat-value" style="color:var(--accent)">37</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">SESSIONS</div><div class="mock-stat-value" style="color:var(--green)">39</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">SKILLS</div><div class="mock-stat-value" style="color:var(--purple)">92</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">STORAGE</div><div class="mock-stat-value" style="color:var(--amber)">915<span style="font-size:12px">MB</span></div></div>
             </div>
-            <div class="mock-stat">
-              <div class="mock-stat-label">SESSIONS</div>
-              <div class="mock-stat-value" style="color:var(--green)">39</div>
-            </div>
-            <div class="mock-stat">
-              <div class="mock-stat-label">SKILLS</div>
-              <div class="mock-stat-value" style="color:var(--purple)">92</div>
-            </div>
-            <div class="mock-stat">
-              <div class="mock-stat-label">STORAGE</div>
-              <div class="mock-stat-value" style="color:var(--amber)">915<span style="font-size:12px">MB</span></div>
+            <div class="mock-chart">
+              <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.7"></div>
+              <div class="mock-bar" style="height:65%;background:var(--accent);opacity:.8"></div>
+              <div class="mock-bar" style="height:45%;background:var(--accent);opacity:.6"></div>
+              <div class="mock-bar" style="height:80%;background:var(--accent);opacity:.9"></div>
+              <div class="mock-bar" style="height:55%;background:var(--accent);opacity:.7"></div>
+              <div class="mock-bar" style="height:90%;background:var(--accent)"></div>
+              <div class="mock-bar" style="height:70%;background:var(--accent);opacity:.8"></div>
+              <div class="mock-bar" style="height:50%;background:var(--accent);opacity:.65"></div>
+              <div class="mock-bar" style="height:75%;background:var(--accent);opacity:.85"></div>
+              <div class="mock-bar" style="height:60%;background:var(--accent);opacity:.75"></div>
+              <div class="mock-bar" style="height:85%;background:var(--accent);opacity:.9"></div>
+              <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.6"></div>
             </div>
           </div>
-          <div class="mock-chart">
-            <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.7"></div>
-            <div class="mock-bar" style="height:65%;background:var(--accent);opacity:.8"></div>
-            <div class="mock-bar" style="height:45%;background:var(--accent);opacity:.6"></div>
-            <div class="mock-bar" style="height:80%;background:var(--accent);opacity:.9"></div>
-            <div class="mock-bar" style="height:55%;background:var(--accent);opacity:.7"></div>
-            <div class="mock-bar" style="height:90%;background:var(--accent)"></div>
-            <div class="mock-bar" style="height:70%;background:var(--accent);opacity:.8"></div>
-            <div class="mock-bar" style="height:50%;background:var(--accent);opacity:.65"></div>
-            <div class="mock-bar" style="height:75%;background:var(--accent);opacity:.85"></div>
-            <div class="mock-bar" style="height:60%;background:var(--accent);opacity:.75"></div>
-            <div class="mock-bar" style="height:85%;background:var(--accent);opacity:.9"></div>
-            <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.6"></div>
+
+          <!-- Slide 1: Plugins -->
+          <div class="carousel-slide" data-slide="1">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Plugins <span style="color:var(--text-muted);font-weight:400;font-size:12px">37 installed</span></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">pr-review-toolkit</div><div class="mock-list-sub">GitHub marketplace</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">code-architect</div><div class="mock-list-sub">feature-dev</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">test-generator</div><div class="mock-list-sub">test-generator</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">security-reviewer</div><div class="mock-list-sub">everything-claude-code</div></div><div class="mock-toggle off"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">database-reviewer</div><div class="mock-list-sub">everything-claude-code</div></div><div class="mock-toggle on"></div></div>
           </div>
+
+          <!-- Slide 2: Sessions -->
+          <div class="carousel-slide" data-slide="2">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Sessions <span style="color:var(--text-muted);font-weight:400;font-size:12px">39 total</span></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Fix auth login bug</div><div class="mock-list-sub">Today, 2:30 PM &middot; 12 messages</div></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Add dark mode toggle</div><div class="mock-list-sub">Yesterday &middot; 28 messages</div></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Refactor API handlers</div><div class="mock-list-sub">2 days ago &middot; 45 messages</div></div></div>
+            <div style="margin-top:10px">
+              <div class="mock-msg"><div class="mock-msg-role" style="color:var(--accent)">User</div><div class="mock-msg-text">Can you fix the authentication bug?</div></div>
+              <div class="mock-msg"><div class="mock-msg-role" style="color:var(--green)">Assistant</div><div class="mock-msg-text">I'll investigate the auth module. Let me check the login handler first...</div></div>
+            </div>
+          </div>
+
+          <!-- Slide 3: Config -->
+          <div class="carousel-slide" data-slide="3">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Config Editor</div>
+            <div class="mock-code">{
+  "permissions": {
+    "allow": ["Bash(git *)", "Read", "Write"],
+    "deny": []
+  },
+  "theme": "dark",
+  "language": "en"
+}</div>
+          </div>
+
+          <!-- Slide 4: MCP -->
+          <div class="carousel-slide" data-slide="4">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">MCP Servers <span style="color:var(--text-muted);font-weight:400;font-size:12px">6 configured</span></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">chrome-devtools</div><div class="mock-list-sub">stdio &middot; @anthropic/mcp</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">figma</div><div class="mock-list-sub">stdio &middot; @anthropic/mcp</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">web-search</div><div class="mock-list-sub">sse &middot; http://localhost:3001</div></div><div class="mock-toggle on"></div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">filesystem</div><div class="mock-list-sub">stdio &middot; @anthropic/mcp</div></div><div class="mock-toggle off"></div></div>
+          </div>
+
+          <!-- Slide 5: Skills -->
+          <div class="carousel-slide" data-slide="5">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Skills <span style="color:var(--text-muted);font-weight:400;font-size:12px">92 installed</span></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">commit</div><div class="mock-list-sub">Git commit with co-author</div></div><div class="mock-tag" style="background:rgba(34,197,94,.15);color:var(--green)">Active</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">review-pr</div><div class="mock-list-sub">Pull request review</div></div><div class="mock-tag" style="background:rgba(34,197,94,.15);color:var(--green)">Active</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">deepspeed</div><div class="mock-list-sub">Distributed training</div></div><div class="mock-tag" style="background:rgba(245,158,11,.15);color:var(--amber)">Disabled</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">flash-attention</div><div class="mock-list-sub">Optimized attention</div></div><div class="mock-tag" style="background:rgba(34,197,94,.15);color:var(--green)">Active</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">llama-factory</div><div class="mock-list-sub">Fine-tuning framework</div></div><div class="mock-tag" style="background:rgba(34,197,94,.15);color:var(--green)">Active</div></div>
+          </div>
+
+          <!-- Slide 6: Cleanup -->
+          <div class="carousel-slide" data-slide="6">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Cleanup <span style="color:var(--text-muted);font-weight:400;font-size:12px">915 MB total</span></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Session Storage</div><div class="mock-list-sub">412 MB &middot; 39 files</div></div><div class="mock-tag" style="background:rgba(239,68,68,.1);color:var(--red)">Clean</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Plugin Cache</div><div class="mock-list-sub">285 MB &middot; 148 files</div></div><div class="mock-tag" style="background:rgba(245,158,11,.1);color:var(--amber)">Clean</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">TMP Files</div><div class="mock-list-sub">118 MB &middot; 52 files</div></div><div class="mock-tag" style="background:rgba(239,68,68,.1);color:var(--red)">Clean</div></div>
+            <div class="mock-list-item"><div><div class="mock-list-label">Skill Cache</div><div class="mock-list-sub">100 MB &middot; 24 files</div></div><div class="mock-tag" style="background:rgba(245,158,11,.1);color:var(--amber)">Open</div></div>
+          </div>
+
+          <!-- Slide 7: System -->
+          <div class="carousel-slide" data-slide="7">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">System Info</div>
+            <div class="mock-stat-row">
+              <div class="mock-stat"><div class="mock-stat-label">TOKENS TODAY</div><div class="mock-stat-value" style="color:var(--accent);font-size:16px">1.2M</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">COST TODAY</div><div class="mock-stat-value" style="color:var(--green);font-size:16px">$4.82</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">24h Activity Heatmap</div>
+            <div class="mock-heatmap">
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.15"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.3"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.1"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.6"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.8"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.4"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.2"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.7"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.9"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.5"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.3"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.1"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.4"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.8"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.6"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.2"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.9"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.5"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.3"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.7"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.1"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.4"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.6"></div>
+              <div class="mock-heat-cell" style="background:var(--accent);opacity:.8"></div>
+            </div>
+          </div>
+
         </div>
+      </div>
+      <!-- Carousel dots -->
+      <div class="carousel-dots" id="carouselDots">
+        <div class="carousel-dot active" data-dot="0"></div>
+        <div class="carousel-dot" data-dot="1"></div>
+        <div class="carousel-dot" data-dot="2"></div>
+        <div class="carousel-dot" data-dot="3"></div>
+        <div class="carousel-dot" data-dot="4"></div>
+        <div class="carousel-dot" data-dot="5"></div>
+        <div class="carousel-dot" data-dot="6"></div>
+        <div class="carousel-dot" data-dot="7"></div>
       </div>
     </div>
   </div>
@@ -624,6 +784,7 @@ function applyLang(lang) {
   currentLang = lang;
   localStorage.setItem('cc-lang', lang);
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('langLabel').textContent = lang === 'en' ? 'EN' : '中文';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
@@ -638,7 +799,6 @@ function applyTheme(theme) {
   currentTheme = theme;
   localStorage.setItem('cc-theme', theme);
   document.documentElement.setAttribute('data-theme', theme);
-  // Toggle icon visibility
   const sun = document.querySelector('.icon-sun');
   const moon = document.querySelector('.icon-moon');
   if (theme === 'dark') {
@@ -654,9 +814,66 @@ function toggleTheme() {
   applyTheme(currentTheme === 'light' ? 'dark' : 'light');
 }
 
-// Init from localStorage
+// ========== Carousel ==========
+let carouselIdx = 0;
+const TOTAL_SLIDES = 8;
+let carouselTimer = null;
+
+function goToSlide(idx) {
+  carouselIdx = idx % TOTAL_SLIDES;
+  document.querySelectorAll('.carousel-slide').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.carousel-dot').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.mock-nav-item').forEach(n => n.classList.remove('active'));
+
+  const slide = document.querySelector('.carousel-slide[data-slide="' + carouselIdx + '"]');
+  const dot = document.querySelector('.carousel-dot[data-dot="' + carouselIdx + '"]');
+  const navItem = document.querySelector('.mock-nav-item[data-page="' + carouselIdx + '"]');
+
+  if (slide) slide.classList.add('active');
+  if (dot) dot.classList.add('active');
+  if (navItem) navItem.classList.add('active');
+}
+
+function nextSlide() {
+  goToSlide(carouselIdx + 1);
+}
+
+function startCarousel() {
+  stopCarousel();
+  carouselTimer = setInterval(nextSlide, 3000);
+}
+
+function stopCarousel() {
+  if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
+}
+
+// Click on dots
+document.getElementById('carouselDots').addEventListener('click', function(e) {
+  const dot = e.target.closest('.carousel-dot');
+  if (!dot) return;
+  goToSlide(parseInt(dot.dataset.dot));
+  stopCarousel();
+  startCarousel();
+});
+
+// Click on sidebar nav items
+document.getElementById('mockSidebar').addEventListener('click', function(e) {
+  const item = e.target.closest('.mock-nav-item');
+  if (!item) return;
+  goToSlide(parseInt(item.dataset.page));
+  stopCarousel();
+  startCarousel();
+});
+
+// Pause on hover
+const wrapper = document.querySelector('.screenshot-wrapper');
+wrapper.addEventListener('mouseenter', stopCarousel);
+wrapper.addEventListener('mouseleave', startCarousel);
+
+// Init
 applyTheme(currentTheme);
 applyLang(currentLang);
+startCarousel();
 </script>
 </body>
 </html>
