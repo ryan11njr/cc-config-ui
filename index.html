@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC CONFIG UI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        elevated: 'var(--elevated)',
+        border: 'var(--border)',
+        txt: 'var(--txt)',
+        muted: 'var(--muted)',
+        accent: 'var(--accent)',
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --elevated: #242736;
+    --border: #2e3144;
+    --txt: #e2e4f0;
+    --muted: #8b8fa8;
+    --accent: #6c8cff;
+  }
+  .light {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --elevated: #ffffff;
+    --border: #e2e4ef;
+    --txt: #1a1d27;
+    --muted: #6b7094;
+    --accent: #5b7af5;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--txt); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; }
+  .card:hover { border-color: color-mix(in srgb, var(--border) 60%, var(--txt) 40%); }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.625rem 1rem; border-radius: 8px;
+    color: var(--muted); font-size: 0.875rem; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: var(--elevated); color: var(--txt); }
+  .nav-item.active { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); font-weight: 500; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider { position: absolute; inset: 0; background: var(--border); border-radius: 11px; transition: 0.2s; }
+  .toggle .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: var(--muted); border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .slider { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .toggle input:checked + .slider:before { transform: translateX(18px); background: var(--accent); }
+
+  .input {
+    width: 100%; background: var(--elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.875rem;
+    color: var(--txt); outline: none; transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .input:focus { border-color: var(--accent); }
+  .input-mono { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.8125rem; }
+
+  .btn {
+    padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; cursor: pointer;
+    transition: all 0.15s; border: none; font-weight: 500;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--elevated); color: var(--txt); }
+  .btn-danger { background: color-mix(in srgb, #f87171 15%, transparent); color: #f87171; }
+  .btn-danger:hover { background: color-mix(in srgb, #f87171 25%, transparent); }
+
+  .badge { font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; }
+  .badge-blue { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+  .badge-green { background: color-mix(in srgb, #4ade80 12%, transparent); color: #4ade80; }
+  .badge-red { background: color-mix(in srgb, #f87171 12%, transparent); color: #f87171; }
+  .badge-amber { background: color-mix(in srgb, #fbbf24 12%, transparent); color: #fbbf24; }
+
+  .tab { padding: 0.5rem 1rem; font-size: 0.875rem; border-radius: 8px; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+  .tab:hover { color: var(--txt); }
+  .tab.active { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); }
+
+  #page-container { animation: fadeIn 0.2s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+  .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; max-width: 640px; width: 100%; margin: 0 1rem; max-height: 80vh; overflow-y: auto; }
+
+  .bar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: var(--elevated); }
+  .bar > div { transition: width 0.3s; }
+
+  .stat-value { font-size: 1.875rem; font-weight: 700; line-height: 1.2; }
+  .skeleton { background: var(--elevated); border-radius: 8px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100; padding: 0.75rem 1.25rem; border-radius: 12px; font-size: 0.875rem; animation: slideUp 0.3s ease-out; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body class="font-sans min-h-screen flex">
+
+<!-- Sidebar -->
+<aside class="sidebar w-60 min-h-screen flex flex-col fixed left-0 top-0 bottom-0 z-30">
+  <div class="p-5 border-b" style="border-color: var(--border)">
+    <h1 class="text-base font-semibold flex items-center gap-2">
+      <img src="logo.png" alt="CC" class="w-6 h-6 rounded">
+      <span data-t="sidebar.title">CC CONFIG UI</span>
+    </h1>
+    <p class="text-xs mt-1" style="color: var(--muted)" data-t="sidebar.subtitle">v0.1 · Lightweight Manager</p>
+  </div>
+  <nav class="flex-1 p-3 space-y-0.5" id="nav">
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span data-t="nav.dashboard">Dashboard</span>
+    </div>
+    <div class="nav-item" data-page="plugins" onclick="navigate('plugins')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 0a4 4 0 100 8 4 4 0 000-8zm0 8v6"/><circle cx="12" cy="12" r="3"/></svg>
+      <span data-t="nav.plugins">Plugins</span>
+    </div>
+    <div class="nav-item" data-page="sessions" onclick="navigate('sessions')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-t="nav.sessions">Sessions</span>
+    </div>
+    <div class="nav-item" data-page="config" onclick="navigate('config')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span data-t="nav.config">Config</span>
+    </div>
+    <div class="nav-item" data-page="mcp" onclick="navigate('mcp')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span data-t="nav.mcp">MCP</span>
+    </div>
+    <div class="nav-item" data-page="skills" onclick="navigate('skills')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span data-t="nav.skills">Skills</span>
+    </div>
+    <div class="nav-item" data-page="cleanup" onclick="navigate('cleanup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      <span data-t="nav.cleanup">Cleanup</span>
+    </div>
+    <div class="nav-item" data-page="system" onclick="navigate('system')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span data-t="nav.system">System</span>
+    </div>
+  </nav>
+  <div class="p-3 border-t flex items-center justify-between gap-2" style="border-color: var(--border)">
+    <button onclick="toggleLang()" class="btn btn-ghost text-xs px-2 py-1" id="lang-btn">中文</button>
+    <button onclick="toggleTheme()" class="btn btn-ghost text-xs px-2 py-1" id="theme-btn">☀️ Light</button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-60 flex-1 min-h-screen">
+  <div id="page-container" class="p-8 max-w-6xl"></div>
+</main>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center" onclick="if(event.target===this)closeModal()">
+  <div id="modal-content" class="modal-content"></div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ==================== I18N ====================
+const T = {
+  en: {
+    sidebar: { title: 'CC CONFIG UI', subtitle: 'v0.1 · Lightweight Manager' },
+    nav: { dashboard: 'Dashboard', plugins: 'Plugins', sessions: 'Sessions', config: 'Config', mcp: 'MCP', skills: 'Skills', cleanup: 'Cleanup', system: 'System' },
+    theme: { light: '☀️ Light', dark: '🌙 Dark' },
+    lang: { label: '中文' },
+    dashboard: {
+      title: 'Dashboard', plugins: 'Plugins', sessions: 'Sessions', skills: 'Skills', storage: 'Storage',
+      sources: 'sources', projects: 'projects', builtin: 'Built-in skills', totalUsage: 'Total usage',
+      storageDistribution: 'Storage Distribution', recentActivity: 'Recent Activity', noActivity: 'No recent activity',
+      currentConfig: 'Current Configuration', model: 'Model', effortLevel: 'Effort Level',
+      pluginSources: 'Plugin Sources', projectCount: 'Projects',
+      loadFail: 'Failed to load',
+    },
+    plugins: {
+      title: 'Plugin Management', search: 'Search plugins...', all: 'All',
+      installs: 'installs', detail: 'Detail', uninstall: 'Uninstall',
+      skillMd: 'SKILL.md', noSkillMd: 'No SKILL.md found',
+      enabled: 'Plugin enabled', disabled: 'Plugin disabled',
+      toggleFail: 'Operation failed', loadFail: 'Failed to load',
+      confirmUninstall: 'Confirm uninstall plugin', uninstalled: 'Plugin uninstalled', uninstallFail: 'Uninstall failed',
+      loading: 'Loading...',
+    },
+    sessions: {
+      title: 'Session Management', projectList: 'Projects', sessionCount: 'sessions',
+      noSessions: 'No sessions', view: 'View', resume: 'Resume', delete: 'Delete',
+      confirmDelete: 'Confirm delete session', deleted: 'Session deleted', deleteFail: 'Delete failed',
+      contentTitle: 'Session Content', messages: 'messages', workingDir: 'Working Dir',
+      resumeCli: 'Resume in CLI', copyCmd: 'Copy', copied: 'Copied!',
+      noMessages: 'No messages found', loadFail: 'Failed to load',
+      untitled: 'Untitled Session',
+      rename: 'Rename', renamed: 'Session renamed', renameFail: 'Rename failed',
+      renamePlaceholder: 'Enter new title...',
+    },
+    config: {
+      title: 'Configuration Editor', modelSettings: 'Model Settings', model: 'Model',
+      effortLevel: 'Effort Level', envVars: 'Environment Variables', addVar: '+ Add Variable',
+      enabledPlugins: 'Enabled Plugins', manageInPlugins: 'Manage in Plugins page',
+      permissions: 'Permissions', reset: 'Reset', save: 'Save Settings',
+      saved: 'Settings saved', saveFail: 'Save failed',
+      globalMemory: 'Global Memory', autoRead: 'Auto-loaded at session start',
+      claudeMdSaved: 'CLAUDE.md saved',
+      authorizedPerms: 'Authorized Permissions', entries: 'entries',
+      confirmDeletePerm: 'Confirm delete this permission?', permDeleted: 'Permission deleted', permDeleteFail: 'Delete failed',
+      loadFail: 'Failed to load',
+    },
+    mcp: {
+      title: 'MCP Servers', total: 'servers', noServers: 'No MCP servers found',
+      type: 'Type', http: 'HTTP', command: 'Command', plugin: 'Plugin',
+      enabled: 'MCP server enabled', disabled: 'MCP server disabled',
+      confirmDelete: 'Confirm delete MCP server', deleted: 'MCP server deleted', deleteFail: 'Delete failed',
+      toggleFail: 'Operation failed', loadFail: 'Failed to load',
+      detail: 'Detail', config: 'Config', args: 'Args',
+      envVars: 'Env Vars', authRequired: 'Auth Required',
+    },
+    skills: {
+      title: 'Skills Browser', search: 'Search', skills: 'skills', total: 'Total',
+      detail: 'Detail', delete: 'Delete', noContent: 'No content',
+      confirmDelete: 'Confirm delete skill', deleted: 'Skill deleted', deleteFail: 'Delete failed',
+      loading: 'Loading...', loadFail: 'Failed to load',
+      installed: 'Installed', marketplace: 'Marketplace',
+      installedBadge: 'Installed',
+      enable: 'Enable', disable: 'Disable', enabled: 'Skill enabled', disabled: 'Skill disabled',
+      enableFail: 'Enable failed', disableFail: 'Disable failed',
+    },
+    marketplace: {
+      title: 'Skills Marketplace', source: 'Source', skills: 'skills',
+      noMarketplaces: 'No marketplaces found', loadFail: 'Failed to load',
+      lastUpdated: 'Last updated', from: 'From',
+    },
+    cleanup: {
+      title: 'Cleanup Tool',
+      cache: { label: 'Cache Files', desc: 'cache/ directory' },
+      debug: { label: 'Debug Logs', desc: 'debug/ directory' },
+      pasteCache: { label: 'Paste Cache', desc: 'paste-cache/ directory' },
+      fileHistory: { label: 'File History', desc: 'file-history/ directory' },
+      shellSnapshots: { label: 'Shell Snapshots', desc: 'shell-snapshots/ directory' },
+      sessionEnv: { label: 'Session Env', desc: 'session-env/ directory' },
+      backups: { label: 'Backup Files', desc: 'backups/ directory' },
+      todos: { label: 'Todo Cache', desc: 'todos/ directory' },
+      estimated: 'Estimated space to free', execute: 'Execute Cleanup',
+      confirm: 'Confirm cleanup of selected directories? This cannot be undone.',
+      done: 'Cleanup complete', fail: 'Cleanup failed', loadFail: 'Failed to load',
+      openFolder: 'Open Folder', openFail: 'Failed to open folder',
+    },
+    system: {
+      title: 'System Information', modelUsage: 'Model Usage Statistics',
+      activityHours: 'Activity by Hour', dailyStats: 'Daily Statistics',
+      history: 'History', entries: 'entries', messages: 'messages',
+      noData: 'No data', loadFail: 'Failed to load',
+    },
+  },
+  zh: {
+    sidebar: { title: 'CC CONFIG UI', subtitle: 'v0.1 · 轻量级管理界面' },
+    nav: { dashboard: '仪表盘', plugins: '插件管理', sessions: '会话管理', config: '配置编辑', mcp: 'MCP 服务', skills: '技能浏览', cleanup: '清理工具', system: '系统信息' },
+    theme: { light: '☀️ 亮色', dark: '🌙 暗色' },
+    lang: { label: 'EN' },
+    dashboard: {
+      title: '仪表盘', plugins: '插件', sessions: '会话', skills: '技能', storage: '存储',
+      sources: '个来源', projects: '个项目', builtin: '内置技能', totalUsage: '总占用',
+      storageDistribution: '存储空间分布', recentActivity: '最近活动', noActivity: '暂无活动记录',
+      currentConfig: '当前配置', model: '模型', effortLevel: '努力等级',
+      pluginSources: '插件来源', projectCount: '项目数',
+      loadFail: '加载失败',
+    },
+    plugins: {
+      title: '插件管理', search: '搜索插件...', all: '全部',
+      installs: '安装', detail: '详情', uninstall: '卸载',
+      skillMd: 'SKILL.md', noSkillMd: '未找到 SKILL.md 文件',
+      enabled: '插件已启用', disabled: '插件已禁用',
+      toggleFail: '操作失败', loadFail: '加载失败',
+      confirmUninstall: '确定要卸载插件', uninstalled: '插件已卸载', uninstallFail: '卸载失败',
+      loading: '加载中...',
+    },
+    sessions: {
+      title: '会话管理', projectList: '项目列表', sessionCount: '个会话',
+      noSessions: '暂无会话', view: '查看', resume: '恢复', delete: '删除',
+      confirmDelete: '确定要删除会话', deleted: '会话已删除', deleteFail: '删除失败',
+      contentTitle: '对话内容', messages: '条消息', workingDir: '工作目录',
+      resumeCli: '在 CLI 中恢复', copyCmd: '复制', copied: '已复制!',
+      noMessages: '未找到消息', loadFail: '加载失败',
+      untitled: '未命名会话',
+      rename: '重命名', renamed: '会话已重命名', renameFail: '重命名失败',
+      renamePlaceholder: '输入新标题...',
+    },
+    config: {
+      title: '配置编辑', modelSettings: '模型设置', model: '模型',
+      effortLevel: '努力等级', envVars: '环境变量', addVar: '+ 添加变量',
+      enabledPlugins: '已启用插件', manageInPlugins: '在插件管理页面操作',
+      permissions: '权限设置', reset: '重置', save: '保存设置',
+      saved: '设置已保存', saveFail: '保存失败',
+      globalMemory: '全局记忆', autoRead: '每次会话开始时自动读取',
+      claudeMdSaved: 'CLAUDE.md 已保存',
+      authorizedPerms: '已授权权限', entries: '条',
+      confirmDeletePerm: '确定要删除此权限吗？', permDeleted: '权限已删除', permDeleteFail: '删除失败',
+      loadFail: '加载失败',
+    },
+    mcp: {
+      title: 'MCP 服务器', total: '个服务', noServers: '未找到 MCP 服务器',
+      type: '类型', http: 'HTTP', command: '命令', plugin: '插件',
+      enabled: 'MCP 服务已启用', disabled: 'MCP 服务已禁用',
+      confirmDelete: '确定要删除 MCP 服务', deleted: 'MCP 服务已删除', deleteFail: '删除失败',
+      toggleFail: '操作失败', loadFail: '加载失败',
+      detail: '详情', config: '配置', args: '参数',
+      envVars: '环境变量', authRequired: '需要认证',
+    },
+    skills: {
+      title: '技能浏览', search: '搜索', skills: '个技能', total: '共',
+      detail: '详情', delete: '删除', noContent: '无内容',
+      confirmDelete: '确定要删除技能', deleted: '技能已删除', deleteFail: '删除失败',
+      loading: '加载中...', loadFail: '加载失败',
+      installed: '已安装', marketplace: '市场',
+      installedBadge: '已安装',
+      enable: '启用', disable: '停用', enabled: '技能已启用', disabled: '技能已停用',
+      enableFail: '启用失败', disableFail: '停用失败',
+    },
+    marketplace: {
+      title: '技能市场', source: '来源', skills: '个技能',
+      noMarketplaces: '暂无市场', loadFail: '加载失败',
+      lastUpdated: '最后更新', from: '来自',
+    },
+    cleanup: {
+      title: '清理工具',
+      cache: { label: '缓存文件', desc: 'cache/ 目录' },
+      debug: { label: '调试日志', desc: 'debug/ 目录' },
+      pasteCache: { label: '粘贴缓存', desc: 'paste-cache/ 目录' },
+      fileHistory: { label: '文件历史', desc: 'file-history/ 目录' },
+      shellSnapshots: { label: 'Shell 快照', desc: 'shell-snapshots/ 目录' },
+      sessionEnv: { label: '会话环境', desc: 'session-env/ 目录' },
+      backups: { label: '备份文件', desc: 'backups/ 目录' },
+      todos: { label: '待办缓存', desc: 'todos/ 目录' },
+      estimated: '预计释放空间', execute: '执行清理',
+      confirm: '确定要清理所选目录吗？此操作不可恢复。',
+      done: '清理完成', fail: '清理失败', loadFail: '加载失败',
+      openFolder: '打开文件夹', openFail: '打开文件夹失败',
+    },
+    system: {
+      title: '系统信息', modelUsage: '模型使用统计',
+      activityHours: '活跃时段分布', dailyStats: '每日统计',
+      history: '历史记录', entries: '条', messages: '条消息',
+      noData: '暂无数据', loadFail: '加载失败',
+    },
+  },
+};
+
+let lang = localStorage.getItem('cc-lang') || 'en';
+function t(path) {
+  const parts = path.split('.');
+  let obj = T[lang];
+  for (const p of parts) { obj = obj?.[p]; }
+  return obj || path;
+}
+function toggleLang() {
+  lang = lang === 'en' ? 'zh' : 'en';
+  localStorage.setItem('cc-lang', lang);
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    const val = t(key);
+    if (val !== key) el.textContent = val;
+  });
+  $('#lang-btn').textContent = t('lang.label');
+  applyTheme();
+  render();
+}
+
+// ==================== STATE ====================
+const S = {
+  page: 'dashboard',
+  theme: localStorage.getItem('cc-theme') || 'dark',
+  data: {},
+  loading: false,
+};
+
+// ==================== API ====================
+const API = {
+  async get(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async put(url, data) {
+    const r = await fetch(url, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async post(url, data) {
+    const r = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async del(url) {
+    const r = await fetch(url, { method: 'DELETE' });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+};
+
+// ==================== UTILS ====================
+function fmtBytes(b) {
+  if (b === 0) return '0 B';
+  const u = ['B','KB','MB','GB'];
+  const i = Math.floor(Math.log(b) / Math.log(1024));
+  return (b / Math.pow(1024, i)).toFixed(1) + ' ' + u[i];
+}
+function fmtDate(iso) {
+  if (!iso) return '-';
+  try { return new Date(iso).toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+  catch { return iso; }
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+function toast(msg, type='success') {
+  const t = $('#toast');
+  t.className = `toast ${type === 'error' ? 'badge-red' : type === 'warn' ? 'badge-amber' : 'badge-green'}`;
+  t.style.background = type === 'error' ? 'var(--surface)' : type === 'warn' ? 'var(--surface)' : 'var(--surface)';
+  t.style.border = `1px solid ${type === 'error' ? '#f87171' : type === 'warn' ? '#fbbf24' : '#4ade80'}`;
+  t.style.color = type === 'error' ? '#f87171' : type === 'warn' ? '#fbbf24' : '#4ade80';
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+function openModal(html) {
+  $('#modal-content').innerHTML = html;
+  $('#modal-overlay').classList.remove('hidden');
+}
+function closeModal() {
+  $('#modal-overlay').classList.add('hidden');
+}
+
+function loading(html='') {
+  return `<div class="flex items-center justify-center py-20"><div class="skeleton w-16 h-16 rounded-full"></div></div>`;
+}
+
+// ==================== THEME ====================
+function applyTheme() {
+  document.documentElement.classList.toggle('light', S.theme === 'light');
+  $('#theme-btn').textContent = S.theme === 'dark' ? t('theme.light') : t('theme.dark');
+}
+function toggleTheme() {
+  S.theme = S.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('cc-theme', S.theme);
+  applyTheme();
+}
+
+// ==================== ROUTER ====================
+function navigate(page) {
+  S.page = page;
+  $$('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+  const c = $('#page-container');
+  c.style.animation = 'none';
+  c.offsetHeight; // reflow
+  c.style.animation = '';
+  render();
+}
+
+async function render() {
+  const container = $('#page-container');
+  switch(S.page) {
+    case 'dashboard': await renderDashboard(container); break;
+    case 'plugins': await renderPlugins(container); break;
+    case 'sessions': await renderSessions(container); break;
+    case 'config': await renderConfig(container); break;
+    case 'mcp': await renderMCP(container); break;
+    case 'skills': await renderSkills(container); break;
+    case 'cleanup': await renderCleanup(container); break;
+    case 'system': await renderSystem(container); break;
+  }
+}
+
+// ==================== DASHBOARD ====================
+async function renderDashboard(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/dashboard');
+    const colors = ['#6c8cff','#a78bfa','#4ade80','#f87171','#fbbf24','#f472b6','#34d399','#fb923c'];
+    const storageEntries = Object.entries(d.storage).sort((a,b) => b[1]-a[1]).slice(0, 8);
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('dashboard.title')}</h2>
+
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        ${statCard(t('dashboard.plugins'), d.totalPlugins, `${Object.keys(d.pluginsBySource).length} ${t('dashboard.sources')}`, '#6c8cff')}
+        ${statCard(t('dashboard.sessions'), d.totalSessions, `${d.totalProjects} ${t('dashboard.projects')}`, '#a78bfa')}
+        ${statCard(t('dashboard.skills'), d.totalSkills, t('dashboard.builtin'), '#4ade80')}
+        ${statCard(t('dashboard.storage'), fmtBytes(d.totalStorage), t('dashboard.totalUsage'), '#fbbf24')}
+      </div>
+
+      <div class="card mb-6">
+        <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('dashboard.storageDistribution')}</h3>
+        <div class="bar mb-4" style="height:12px">
+          ${storageEntries.map(([name, size], i) =>
+            `<div style="width:${Math.max(size/d.totalStorage*100, 1)}%;background:${colors[i%colors.length]}" title="${name}: ${fmtBytes(size)}"></div>`
+          ).join('')}
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          ${storageEntries.map(([name, size], i) => `
+            <div class="flex items-center gap-2 text-sm py-1">
+              <span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:${colors[i%colors.length]}"></span>
+              <span class="truncate">${esc(name)}</span>
+              <span class="ml-auto flex-shrink-0" style="color:var(--muted)">${fmtBytes(size)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('dashboard.recentActivity')}</h3>
+          <div class="space-y-2 max-h-80 overflow-y-auto">
+            ${(d.recentHistory || []).map(h => `
+              <div class="flex items-start gap-3 p-2.5 rounded-lg" style="background:var(--elevated)">
+                <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:var(--accent)"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm truncate">${esc(h.display || h.query || '-')}</p>
+                  <p class="text-xs mt-0.5" style="color:var(--muted)">${fmtDate(h.timestamp)}</p>
+                </div>
+              </div>
+            `).join('') || `<p class="text-sm" style="color:var(--muted)">${t('dashboard.noActivity')}</p>`}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('dashboard.currentConfig')}</h3>
+          <div class="space-y-4">
+            <div class="flex justify-between"><span class="text-sm" style="color:var(--muted)">${t('dashboard.model')}</span><span class="text-sm font-mono">${esc(d.model)}</span></div>
+            <div class="flex justify-between"><span class="text-sm" style="color:var(--muted)">${t('dashboard.effortLevel')}</span><span class="text-sm font-mono">${esc(d.effortLevel)}</span></div>
+            <div class="flex justify-between"><span class="text-sm" style="color:var(--muted)">${t('dashboard.pluginSources')}</span>
+              <div class="flex gap-1 flex-wrap justify-end">
+                ${Object.entries(d.pluginsBySource).map(([s,c]) => `<span class="badge badge-blue">${s.split('-')[0]}(${c})</span>`).join('')}
+              </div>
+            </div>
+            <div class="flex justify-between"><span class="text-sm" style="color:var(--muted)">${t('dashboard.projectCount')}</span><span class="text-sm">${d.totalProjects}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p class="text-sm" style="color:#f87171">${t('dashboard.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function statCard(label, value, sub, color) {
+  return `<div class="card">
+    <div class="flex items-center gap-2 text-sm mb-2" style="color:var(--muted)">
+      <div class="w-2 h-2 rounded-full" style="background:${color}"></div>${label}
+    </div>
+    <div class="stat-value">${typeof value === 'number' && value > 999999 ? fmtBytes(value) : value}</div>
+    <div class="text-xs mt-1" style="color:var(--muted)">${sub}</div>
+  </div>`;
+}
+
+// ==================== PLUGINS ====================
+async function renderPlugins(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/plugins');
+    S.data.plugins = d;
+    const sources = d.sources;
+    const sourceNames = Object.keys(sources);
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('plugins.title')}</h2>
+      <div class="relative mb-4">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="input pl-10" placeholder="${t('plugins.search')}" oninput="filterPlugins(this.value)" id="plugin-search">
+      </div>
+      <div class="flex gap-1 mb-6 overflow-x-auto pb-2" id="plugin-tabs">
+        <div class="tab active" onclick="filterBySource(this, '')">${t('plugins.all')} (${d.total})</div>
+        ${sourceNames.map(s => `<div class="tab" onclick="filterBySource(this, '${s}')">${s.split('claude-plugins-official').join('official').split('awesome-claude-skills').join('skills').split('feedmob-claude-plugins').join('feedmob')} (${sources[s].length})</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-2 gap-4" id="plugin-grid">
+        ${d.plugins.map(p => pluginCard(p)).join('')}
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('plugins.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function pluginCard(p) {
+  return `<div class="card group plugin-card" data-name="${esc(p.name.toLowerCase())}" data-source="${esc(p.source)}">
+    <div class="flex items-start justify-between mb-3">
+      <div class="flex-1 min-w-0 mr-3">
+        <h4 class="text-sm font-medium truncate">${esc(p.name)}</h4>
+        <p class="text-xs mt-0.5" style="color:var(--muted)">${esc(p.source)}</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" ${p.enabled ? 'checked' : ''} onchange="togglePlugin('${esc(p.key)}', this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="flex items-center gap-3 text-xs" style="color:var(--muted)">
+      ${p.installCount ? `<span>${(p.installCount/1000).toFixed(0)}K ${t('plugins.installs')}</span>` : ''}
+      ${p.installedAt && p.installedAt !== 'unknown' ? `<span>${p.installedAt.slice(0,10)}</span>` : ''}
+    </div>
+    <div class="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <button class="btn text-xs px-3 py-1" style="background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent)" onclick="viewPluginDetail('${esc(p.key)}')">${t('plugins.detail')}</button>
+      <button class="btn btn-danger text-xs px-3 py-1" onclick="deletePlugin('${esc(p.key)}','${esc(p.name)}')">${t('plugins.uninstall')}</button>
+    </div>
+  </div>`;
+}
+
+async function togglePlugin(key, enabled) {
+  try {
+    await API.post('/api/plugins/toggle', { key, enabled });
+    toast(enabled ? t('plugins.enabled') : t('plugins.disabled'));
+  } catch(e) {
+    toast(t('plugins.toggleFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function viewPluginDetail(key) {
+  openModal(`<div class="p-6"><p class="text-sm" style="color:var(--muted)">${t('plugins.loading')}</p></div>`);
+  try {
+    const d = await API.get(`/api/plugins/${encodeURIComponent(key)}`);
+    openModal(`
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold">${esc(key)}</h2>
+          <button onclick="closeModal()" class="btn btn-ghost px-2 py-1">✕</button>
+        </div>
+        ${d.path ? `<div class="text-xs font-mono mb-4 p-3 rounded-lg" style="background:var(--bg);color:var(--muted);word-break:break-all">${esc(d.path)}</div>` : ''}
+        ${d.skillContent ? `
+          <h3 class="text-sm font-semibold mb-2" style="color:var(--muted)">${t('plugins.skillMd')}</h3>
+          <div class="p-4 rounded-lg text-sm font-mono max-h-96 overflow-y-auto whitespace-pre-wrap" style="background:var(--bg)">${esc(d.skillContent)}</div>
+        ` : `<p class="text-sm" style="color:var(--muted)">${t('plugins.noSkillMd')}</p>`}
+      </div>
+    `);
+  } catch(e) {
+    openModal(`<div class="p-6"><p style="color:#f87171">${esc(e.message)}</p></div>`);
+  }
+}
+
+async function deletePlugin(key, name) {
+  if (!confirm(`${t('plugins.confirmUninstall')} "${name}"?`)) return;
+  try {
+    await API.del(`/api/plugins/${encodeURIComponent(key)}`);
+    toast(t('plugins.uninstalled'));
+    render();
+  } catch(e) {
+    toast(t('plugins.uninstallFail') + ': ' + e.message, 'error');
+  }
+}
+
+function filterPlugins(query) {
+  const q = query.toLowerCase();
+  $$('.plugin-card').forEach(el => {
+    const match = el.dataset.name.includes(q);
+    el.style.display = match ? '' : 'none';
+  });
+}
+
+function filterBySource(tabEl, source) {
+  $$('#plugin-tabs .tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  $$('.plugin-card').forEach(el => {
+    el.style.display = (!source || el.dataset.source === source) ? '' : 'none';
+  });
+}
+
+// ==================== SESSIONS ====================
+async function renderSessions(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/sessions');
+    S.data.sessions = d;
+    const projects = d.projects.sort((a,b) => b.size - a.size);
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('sessions.title')}</h2>
+      <div class="flex gap-6">
+        <div class="w-72 flex-shrink-0">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">${t('sessions.projectList')}</h3>
+          <div class="space-y-1" id="project-list">
+            ${projects.map((p, i) => `
+              <div class="p-3 rounded-lg cursor-pointer transition ${i===0 ? 'border' : ''}" style="${i===0 ? 'background:color-mix(in srgb, var(--accent) 8%, transparent);border-color:color-mix(in srgb, var(--accent) 20%, transparent)' : ''}" data-project="${esc(p.name)}" onclick="selectProject(this, '${esc(p.name)}')">
+                <div class="text-sm font-medium truncate">${esc(p.name.replace(/--/g, '\\').replace(/^-/, ''))}</div>
+                <div class="text-xs mt-1" style="color:var(--muted)">${p.sessions.length} ${t('sessions.sessionCount')} · ${fmtBytes(p.size)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="flex-1" id="session-list">
+          ${projects[0] ? renderSessionList(projects[0]) : `<p class="text-sm" style="color:var(--muted)">${t('sessions.noSessions')}</p>`}
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('sessions.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function renderSessionList(project) {
+  const sessions = project.sessions.sort((a,b) => new Date(b.modified) - new Date(a.modified));
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold">${esc(project.name)} <span style="color:var(--muted)">· ${sessions.length} ${t('sessions.sessionCount')} · ${fmtBytes(project.size)}</span></h3>
+    </div>
+    <div class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+      ${sessions.map(s => `
+        <div class="card !p-4 group">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:color-mix(in srgb, var(--accent) 10%, transparent)">
+                <svg class="w-4 h-4" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium truncate session-title-${esc(s.id)}">${esc(s.title || t('sessions.untitled'))}</span>
+                  ${s.hasCustomTitle ? '<span class="badge badge-blue text-xs">custom</span>' : ''}
+                  <button class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--muted)" onclick="event.stopPropagation();renameSessionInline('${esc(project.name)}','${esc(s.id)}','${esc(s.title || '')}')" title="${t('sessions.rename')}">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                </div>
+                <div class="text-xs font-mono mt-0.5 truncate" style="color:var(--muted)">${esc(s.id.slice(0,16))}...</div>
+              </div>
+            </div>
+            <span class="badge badge-amber">${fmtBytes(s.size)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs" style="color:var(--muted)">${fmtDate(s.modified)}</span>
+            <div class="flex items-center gap-2">
+              <button class="btn text-xs px-2.5 py-1" style="background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent)" onclick="viewSessionContent('${esc(project.name)}','${esc(s.id)}')">${t('sessions.view')}</button>
+              <button class="btn text-xs px-2.5 py-1" style="background:color-mix(in srgb, #4ade80 10%, transparent);color:#4ade80" onclick="resumeSession('${esc(s.id)}')">${t('sessions.resume')}</button>
+              <button class="btn btn-danger text-xs px-2 py-1" onclick="deleteSession('${esc(project.name)}','${esc(s.id)}')">${t('sessions.delete')}</button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectProject(el, name) {
+  $$('#project-list > div').forEach(d => {
+    d.style.background = '';
+    d.style.borderColor = '';
+    d.className = d.className.replace(' border', '');
+  });
+  el.style.background = 'color-mix(in srgb, var(--accent) 8%, transparent)';
+  el.style.borderColor = 'color-mix(in srgb, var(--accent) 20%, transparent)';
+  el.className += ' border';
+  const project = S.data.sessions.projects.find(p => p.name === name);
+  if (project) {
+    $('#session-list').innerHTML = renderSessionList(project);
+  }
+}
+
+async function viewSessionContent(project, sessionId) {
+  openModal(`<div class="p-6"><p class="text-sm" style="color:var(--muted)">${t('plugins.loading')}</p></div>`);
+  try {
+    const d = await API.get(`/api/sessions/${encodeURIComponent(project)}/${encodeURIComponent(sessionId)}`);
+    const messages = d.messages || [];
+    const resumeCmd = `claude --resume ${sessionId}`;
+    openModal(`
+      <div class="p-6" style="max-width:720px">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">${esc(d.title || t('sessions.untitled'))}</h2>
+            <p class="text-xs font-mono mt-1" style="color:var(--muted)">${esc(sessionId)}</p>
+          </div>
+          <button onclick="closeModal()" class="btn btn-ghost px-2 py-1">✕</button>
+        </div>
+        ${d.cwd ? `<div class="text-xs mb-3 p-2 rounded" style="background:var(--elevated);color:var(--muted)">${t('sessions.workingDir')}: <span class="font-mono">${esc(d.cwd)}</span></div>` : ''}
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xs" style="color:var(--muted)">${messages.length} ${t('sessions.messages')}</span>
+          <button class="btn text-xs px-2.5 py-1 ml-auto" style="background:color-mix(in srgb, #4ade80 10%, transparent);color:#4ade80" onclick="resumeSession('${esc(sessionId)}')">${t('sessions.resumeCli')}</button>
+          <button class="btn btn-ghost text-xs px-2.5 py-1" onclick="navigator.clipboard.writeText('${resumeCmd}');toast('${t('sessions.copied')}')">${t('sessions.copyCmd')}</button>
+        </div>
+        <div class="space-y-3 max-h-[50vh] overflow-y-auto">
+          ${messages.length > 0 ? messages.map(m => `
+            <div class="flex gap-3 ${m.role === 'user' ? '' : 'flex-row-reverse'}">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style="background:${m.role === 'user' ? 'color-mix(in srgb, var(--accent) 15%, transparent)' : 'color-mix(in srgb, #4ade80 15%, transparent)'};color:${m.role === 'user' ? 'var(--accent)' : '#4ade80'}">
+                ${m.role === 'user' ? 'U' : 'A'}
+              </div>
+              <div class="flex-1 min-w-0 p-3 rounded-lg text-sm whitespace-pre-wrap" style="background:var(--elevated);max-width:85%">${esc(m.content)}</div>
+            </div>
+          `).join('') : `<p class="text-sm" style="color:var(--muted)">${t('sessions.noMessages')}</p>`}
+        </div>
+      </div>
+    `);
+  } catch(e) {
+    openModal(`<div class="p-6"><p style="color:#f87171">${esc(e.message)}</p></div>`);
+  }
+}
+
+function resumeSession(sessionId) {
+  const cmd = `claude --resume ${sessionId}`;
+  navigator.clipboard.writeText(cmd).then(() => {
+    toast(`${t('sessions.resumeCli')}: ${cmd}`);
+  }).catch(() => {
+    prompt(t('sessions.resumeCli'), cmd);
+  });
+}
+
+async function deleteSession(project, id) {
+  if (!confirm(`${t('sessions.confirmDelete')} ${id.slice(0,8)}...?`)) return;
+  try {
+    await API.del(`/api/sessions/${encodeURIComponent(project)}/${encodeURIComponent(id)}`);
+    toast(t('sessions.deleted'));
+    render();
+  } catch(e) {
+    toast(t('sessions.deleteFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function renameSessionInline(project, sessionId, currentTitle) {
+  const newTitle = prompt(t('sessions.rename'), currentTitle);
+  if (newTitle === null || newTitle === currentTitle) return;
+  try {
+    await API.post('/api/sessions/rename', { project, sessionId, title: newTitle });
+    toast(t('sessions.renamed'));
+    render();
+  } catch(e) {
+    toast(t('sessions.renameFail') + ': ' + e.message, 'error');
+  }
+}
+
+// ==================== MCP ====================
+async function renderMCP(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/mcp');
+    const servers = d.servers || [];
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-2">${t('mcp.title')}</h2>
+      <p class="text-sm mb-6" style="color:var(--muted)">${d.total} ${t('mcp.total')}</p>
+      ${servers.length === 0 ? `<div class="card"><p class="text-sm" style="color:var(--muted)">${t('mcp.noServers')}</p></div>` : ''}
+      <div class="space-y-3">
+        ${servers.map(s => `
+          <div class="card !p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:color-mix(in srgb, ${s.disabled ? 'var(--muted)' : '#a78bfa'} 10%, transparent)">
+                  <svg class="w-4 h-4" style="color:${s.disabled ? 'var(--muted)' : '#a78bfa'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium">${esc(s.name)}</span>
+                    ${s.disabled ? '<span class="badge badge-red text-xs">disabled</span>' : ''}
+                    ${s.needs_auth ? '<span class="badge badge-amber text-xs">' + t('mcp.authRequired') + '</span>' : ''}
+                  </div>
+                  <div class="text-xs mt-0.5" style="color:var(--muted)">${t('mcp.plugin')}: ${esc(s.plugin)}</div>
+                </div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" ${!s.disabled ? 'checked' : ''} onchange="toggleMCP('${esc(s.plugin)}','${esc(s.name)}',!this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="flex items-center gap-3 text-xs" style="color:var(--muted)">
+              <span class="badge ${s.type === 'http' ? 'badge-blue' : 'badge-green'}">${s.type === 'http' ? t('mcp.http') : t('mcp.command')}</span>
+              ${s.type === 'http' && s.url ? `<span class="font-mono truncate">${esc(s.url)}</span>` : ''}
+              ${s.type === 'command' && s.command ? `<span class="font-mono truncate">${esc(s.command)} ${s.args?.length ? s.args.join(' ') : ''}</span>` : ''}
+            </div>
+            ${s.env_keys?.length ? `<div class="mt-2 flex gap-1 flex-wrap">${s.env_keys.map(k => `<span class="badge badge-amber text-xs">${esc(k)}</span>`).join('')}</div>` : ''}
+            <div class="flex items-center gap-2 mt-3">
+              <button class="btn text-xs px-2.5 py-1" style="background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent)" onclick="viewMCPDetail('${esc(s.plugin)}','${esc(s.name)}')">${t('mcp.detail')}</button>
+              <button class="btn btn-danger text-xs px-2 py-1" onclick="deleteMCP('${esc(s.plugin)}','${esc(s.name)}')">${t('sessions.delete')}</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('mcp.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+async function toggleMCP(plugin, server, disabled) {
+  try {
+    await API.post('/api/mcp/toggle', { plugin, server, disabled });
+    toast(disabled ? t('mcp.disabled') : t('mcp.enabled'));
+  } catch(e) {
+    toast(t('mcp.toggleFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function viewMCPDetail(plugin, server) {
+  openModal(`<div class="p-6"><p style="color:var(--muted)">${t('plugins.loading')}</p></div>`);
+  try {
+    const d = await API.get(`/api/mcp/${encodeURIComponent(plugin)}/${encodeURIComponent(server)}`);
+    openModal(`
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">${esc(d.name)}</h2>
+          <button onclick="closeModal()" class="btn btn-ghost px-2 py-1">✕</button>
+        </div>
+        <div class="text-xs mb-3" style="color:var(--muted)">${t('mcp.plugin')}: ${esc(d.plugin)}</div>
+        <div class="p-4 rounded-lg text-sm font-mono max-h-80 overflow-y-auto whitespace-pre-wrap" style="background:var(--bg)">${esc(JSON.stringify(d.config, null, 2))}</div>
+      </div>
+    `);
+  } catch(e) {
+    openModal(`<div class="p-6"><p style="color:#f87171">${esc(e.message)}</p></div>`);
+  }
+}
+
+async function deleteMCP(plugin, server) {
+  if (!confirm(`${t('mcp.confirmDelete')} "${server}"?`)) return;
+  try {
+    await API.del(`/api/mcp/${encodeURIComponent(plugin)}/${encodeURIComponent(server)}`);
+    toast(t('mcp.deleted'));
+    render();
+  } catch(e) {
+    toast(t('mcp.deleteFail') + ': ' + e.message, 'error');
+  }
+}
+
+// ==================== CONFIG ====================
+let configTab = 'settings';
+let configData = {};
+
+async function renderConfig(el) {
+  el.innerHTML = loading();
+  try {
+    const [settings, claudeMd, local] = await Promise.all([
+      API.get('/api/settings'),
+      API.get('/api/claude-md'),
+      API.get('/api/settings-local'),
+    ]);
+    configData = { settings, claudeMd, local };
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('config.title')}</h2>
+      <div class="flex gap-1 mb-6" id="config-tabs">
+        <div class="tab ${configTab==='settings'?'active':''}" onclick="switchConfigTab('settings')">settings.json</div>
+        <div class="tab ${configTab==='claude-md'?'active':''}" onclick="switchConfigTab('claude-md')">CLAUDE.md</div>
+        <div class="tab ${configTab==='local'?'active':''}" onclick="switchConfigTab('local')">${t('config.permissions')}</div>
+      </div>
+      <div id="config-content"></div>
+    `;
+    renderConfigTab();
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('config.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function switchConfigTab(tab) {
+  configTab = tab;
+  $$('#config-tabs .tab').forEach(el => {
+    const isSettings = tab === 'settings' && el.textContent.includes('settings');
+    const isClaudeMd = tab === 'claude-md' && el.textContent.includes('CLAUDE');
+    const isLocal = tab === 'local' && el.textContent.includes(t('config.permissions'));
+    el.classList.toggle('active', isSettings || isClaudeMd || isLocal);
+  });
+  renderConfigTab();
+}
+
+function renderConfigTab() {
+  const el = $('#config-content');
+  if (configTab === 'settings') {
+    const s = configData.settings;
+    const env = s.env || {};
+    el.innerHTML = `
+      <div class="space-y-6">
+        <div class="card">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">${t('config.modelSettings')}</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm" style="color:var(--muted)">${t('config.model')}</label>
+              <input class="input input-mono mt-1" value="${esc(s.model || '')}" id="cfg-model">
+            </div>
+            <div>
+              <label class="text-sm" style="color:var(--muted)">${t('config.effortLevel')}</label>
+              <select class="input mt-1" id="cfg-effort">
+                ${['max','high','default','low'].map(v => `<option ${s.effortLevel===v?'selected':''}>${v}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">${t('config.envVars')}</h3>
+          <div class="space-y-3" id="env-vars">
+            ${Object.entries(env).map(([k,v]) => envVarRow(k, v)).join('')}
+          </div>
+          <button class="btn btn-ghost text-xs mt-3" onclick="addEnvVar()">${t('config.addVar')}</button>
+        </div>
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">${t('config.enabledPlugins')} (${Object.keys(s.enabledPlugins||{}).length})</h3>
+            <span class="text-xs" style="color:var(--muted)">${t('config.manageInPlugins')}</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button class="btn btn-ghost" onclick="renderConfig($('#page-container'))">${t('config.reset')}</button>
+          <button class="btn btn-primary" onclick="saveSettings()">${t('config.save')}</button>
+        </div>
+      </div>
+    `;
+  } else if (configTab === 'claude-md') {
+    el.innerHTML = `
+      <div class="space-y-4">
+        <div class="card">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">CLAUDE.md · ${t('config.globalMemory')}</h3>
+            <span class="text-xs" style="color:var(--muted)">${t('config.autoRead')}</span>
+          </div>
+          <textarea class="input input-mono" rows="16" id="claude-md-editor" style="resize:vertical">${esc(configData.claudeMd.content || '')}</textarea>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button class="btn btn-ghost" onclick="renderConfig($('#page-container'))">${t('config.reset')}</button>
+          <button class="btn btn-primary" onclick="saveClaudeMd()">${t('config.save')}</button>
+        </div>
+      </div>
+    `;
+  } else if (configTab === 'local') {
+    const perms = configData.local.permissions?.allow || [];
+    el.innerHTML = `
+      <div class="space-y-4">
+        <div class="card">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">${t('config.authorizedPerms')} (${perms.length} ${t('config.entries')})</h3>
+          <div class="space-y-1 max-h-[60vh] overflow-y-auto">
+            ${perms.map((p, i) => `
+              <div class="flex items-center gap-3 p-2 rounded hover:bg-[var(--elevated)] group">
+                <span class="badge ${p.startsWith('Bash') ? 'badge-blue' : p.startsWith('mcp') ? 'badge-green' : 'badge-amber'}">${p.startsWith('Bash') ? 'Bash' : p.startsWith('mcp') ? 'MCP' : p.startsWith('Skill') ? 'Skill' : 'Other'}</span>
+                <span class="text-sm font-mono flex-1 truncate">${esc(p)}</span>
+                <button class="btn btn-danger text-xs px-2 py-0.5 opacity-0 group-hover:opacity-100" onclick="removePermission(${i})">${t('sessions.delete')}</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function envVarRow(k, v) {
+  const isSecret = k.toLowerCase().includes('token') || k.toLowerCase().includes('key') || k.toLowerCase().includes('password');
+  return `<div class="flex items-center gap-3">
+    <input class="input input-mono flex-shrink-0" style="width:280px;color:var(--accent)" value="${esc(k)}" data-env-key>
+    <input class="input input-mono flex-1" value="${esc(v)}" type="${isSecret ? 'password' : 'text'}" data-env-val>
+    <button class="btn btn-danger text-xs px-2 py-1 flex-shrink-0" onclick="this.parentElement.remove()">✕</button>
+  </div>`;
+}
+
+function addEnvVar() {
+  const container = $('#env-vars');
+  const div = document.createElement('div');
+  div.innerHTML = envVarRow('NEW_VAR', '');
+  container.appendChild(div.firstElementChild);
+}
+
+async function saveSettings() {
+  try {
+    const env = {};
+    $$('#env-vars > div').forEach(row => {
+      const key = row.querySelector('[data-env-key]').value.trim();
+      const val = row.querySelector('[data-env-val]').value;
+      if (key) env[key] = val;
+    });
+    configData.settings.model = $('#cfg-model').value;
+    configData.settings.effortLevel = $('#cfg-effort').value;
+    configData.settings.env = env;
+    await API.put('/api/settings', configData.settings);
+    toast(t('config.saved'));
+  } catch(e) {
+    toast(t('config.saveFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function saveClaudeMd() {
+  try {
+    await API.put('/api/claude-md', { content: $('#claude-md-editor').value });
+    toast(t('config.claudeMdSaved'));
+  } catch(e) {
+    toast(t('config.saveFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function removePermission(index) {
+  if (!confirm(t('config.confirmDeletePerm'))) return;
+  configData.local.permissions.allow.splice(index, 1);
+  try {
+    await API.put('/api/settings-local', configData.local);
+    toast(t('config.permDeleted'));
+    renderConfigTab();
+  } catch(e) {
+    toast(t('config.permDeleteFail') + ': ' + e.message, 'error');
+  }
+}
+
+let skillsTab = 'installed';
+let marketplaceData = null;
+
+async function renderSkills(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/skills');
+    const skills = d.skills;
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('skills.title')}</h2>
+      <div class="flex gap-1 mb-6" id="skills-tabs">
+        <div class="tab ${skillsTab==='installed'?'active':''}" onclick="switchSkillsTab('installed')">${t('skills.installed')}</div>
+        <div class="tab ${skillsTab==='marketplace'?'active':''}" onclick="switchSkillsTab('marketplace')">${t('skills.marketplace')}</div>
+      </div>
+      <div id="skills-content"></div>
+    `;
+
+    if (skillsTab === 'installed') {
+      renderInstalledSkills(skills, d.total);
+    } else {
+      renderMarketplaceSkills();
+    }
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('skills.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function switchSkillsTab(tab) {
+  skillsTab = tab;
+  $$('#skills-tabs .tab').forEach(el => {
+    const isInstalled = tab === 'installed' && el.textContent.includes(t('skills.installed'));
+    const isMarketplace = tab === 'marketplace' && el.textContent.includes(t('skills.marketplace'));
+    el.classList.toggle('active', isInstalled || isMarketplace);
+  });
+  if (tab === 'installed') {
+    API.get('/api/skills').then(d => renderInstalledSkills(d.skills, d.total));
+  } else {
+    renderMarketplaceSkills();
+  }
+}
+
+function renderInstalledSkills(skills, total) {
+  $('#skills-content').innerHTML = `
+    <div class="flex items-center justify-between mb-4">
+      <div class="relative flex-1 max-w-md">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="input pl-10" placeholder="${t('skills.search')} ${total} ${t('skills.skills')}..." oninput="filterSkillCards(this.value)" id="skill-search">
+      </div>
+      <span class="text-sm" style="color:var(--muted)">${t('skills.total')} ${total}</span>
+    </div>
+    <div class="grid grid-cols-3 gap-3" id="skill-grid">
+      ${skills.map(s => skillCard(s)).join('')}
+    </div>
+  `;
+}
+
+async function renderMarketplaceSkills() {
+  const el = $('#skills-content');
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/marketplace/skills');
+    marketplaceData = d.marketplaces;
+
+    el.innerHTML = `
+      <div class="flex gap-1 mb-4 flex-wrap" id="mp-tabs">
+        ${marketplaceData.map((mp, i) => `
+          <div class="tab ${i===0?'active':''}" onclick="selectMarketplace(this, ${i})">${esc(mp.name)} (${mp.skillCount})</div>
+        `).join('')}
+      </div>
+      <div id="mp-skills-grid"></div>
+    `;
+    if (marketplaceData.length > 0) {
+      renderMarketplaceGrid(marketplaceData[0]);
+    } else {
+      $('#mp-skills-grid').innerHTML = `<div class="card"><p class="text-sm" style="color:var(--muted)">${t('marketplace.noMarketplaces')}</p></div>`;
+    }
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('marketplace.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function selectMarketplace(tabEl, index) {
+  $$('#mp-tabs .tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderMarketplaceGrid(marketplaceData[index]);
+}
+
+function renderMarketplaceGrid(mp) {
+  const grid = $('#mp-skills-grid');
+  const skills = mp.skills || [];
+  grid.innerHTML = `
+    <div class="text-xs mb-3" style="color:var(--muted)">${t('marketplace.source')}: ${esc(mp.url || mp.installLocation || mp.name)}${mp.lastUpdated ? ' · ' + t('marketplace.lastUpdated') + ': ' + String(mp.lastUpdated).slice(0,10) : ''}</div>
+    <div class="grid grid-cols-3 gap-3">
+      ${skills.map(s => `
+        <div class="card !p-4 cursor-pointer hover:border-[color-mix(in-srgb,var(--accent),transparent_70%)]" onclick="viewMarketplaceSkillDetail('${esc(mp.name)}','${esc(s.name)}')">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:color-mix(in srgb, ${s.installed ? '#4ade80' : '#a78bfa'} 10%, transparent)">
+              <svg class="w-4 h-4" style="color:${s.installed ? '#4ade80' : '#a78bfa'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-medium truncate">${esc(s.name)}</h4>
+                ${s.installed ? `<span class="badge badge-green text-xs">${t('skills.installedBadge')}</span>` : ''}
+              </div>
+              <p class="text-xs" style="color:var(--muted)">${fmtBytes(s.size)}${s.hasSkillMd ? ' · SKILL.md' : ''}</p>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function skillCard(s) {
+  const disabled = s.disabled || false;
+  return `<div class="card !p-4 cursor-pointer hover:border-[color-mix(in-srgb,var(--accent),transparent_70%)] skill-card ${disabled ? 'opacity-60' : ''}" data-name="${esc(s.name.toLowerCase())}" onclick="viewSkillDetail('${esc(s.name)}')">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:color-mix(in srgb, ${disabled ? '#fbbf24' : '#a78bfa'} 10%, transparent)">
+        <svg class="w-4 h-4" style="color:${disabled ? '#fbbf24' : '#a78bfa'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <h4 class="text-sm font-medium truncate">${esc(s.name)}</h4>
+          ${disabled ? '<span class="badge badge-amber text-xs">disabled</span>' : ''}
+        </div>
+        <p class="text-xs" style="color:var(--muted)">${fmtBytes(s.size)}${s.hasSkillMd ? ' · SKILL.md' : ''}</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function filterSkillCards(q) {
+  const query = q.toLowerCase();
+  $$('.skill-card').forEach(el => {
+    el.style.display = el.dataset.name.includes(query) ? '' : 'none';
+  });
+}
+
+async function viewSkillDetail(name) {
+  openModal(`<div class="p-6"><p style="color:var(--muted)">${t('skills.loading')}</p></div>`);
+  try {
+    const d = await API.get(`/api/skills/${encodeURIComponent(name)}`);
+    const disabled = d.disabled || false;
+    openModal(`
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-semibold">${esc(d.name)}</h2>
+            ${disabled ? '<span class="badge badge-amber text-xs">disabled</span>' : ''}
+          </div>
+          <div class="flex gap-2">
+            <button class="btn text-xs px-2.5 py-1" style="background:color-mix(in srgb, ${disabled ? '#4ade80' : '#fbbf24'} 10%, transparent);color:${disabled ? '#4ade80' : '#fbbf24'}" onclick="toggleSkill('${esc(d.name)}', ${!disabled})">${disabled ? t('skills.enable') : t('skills.disable')}</button>
+            <button class="btn btn-danger text-xs" onclick="deleteSkill('${esc(d.name)}')">${t('skills.delete')}</button>
+            <button onclick="closeModal()" class="btn btn-ghost px-2 py-1">✕</button>
+          </div>
+        </div>
+        <div class="p-4 rounded-lg text-sm font-mono max-h-96 overflow-y-auto whitespace-pre-wrap" style="background:var(--bg)">${esc(d.content || t('skills.noContent'))}</div>
+      </div>
+    `);
+  } catch(e) {
+    openModal(`<div class="p-6"><p style="color:#f87171">${esc(e.message)}</p></div>`);
+  }
+}
+
+async function viewMarketplaceSkillDetail(mpName, skillName) {
+  openModal(`<div class="p-6"><p style="color:var(--muted)">${t('skills.loading')}</p></div>`);
+  try {
+    const d = await API.get(`/api/marketplace/skill/${encodeURIComponent(mpName)}/${encodeURIComponent(skillName)}`);
+    openModal(`
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">${esc(d.name)}</h2>
+            <p class="text-xs mt-1" style="color:var(--muted)">${t('marketplace.from')}: ${esc(d.marketplace)}</p>
+          </div>
+          <button onclick="closeModal()" class="btn btn-ghost px-2 py-1">✕</button>
+        </div>
+        <div class="p-4 rounded-lg text-sm font-mono max-h-96 overflow-y-auto whitespace-pre-wrap" style="background:var(--bg)">${esc(d.content || t('skills.noContent'))}</div>
+      </div>
+    `);
+  } catch(e) {
+    openModal(`<div class="p-6"><p style="color:#f87171">${esc(e.message)}</p></div>`);
+  }
+}
+
+async function deleteSkill(name) {
+  if (!confirm(`${t('skills.confirmDelete')} "${name}"?`)) return;
+  try {
+    await API.del(`/api/skills/${encodeURIComponent(name)}`);
+    toast(t('skills.deleted'));
+    closeModal();
+    render();
+  } catch(e) {
+    toast(t('skills.deleteFail') + ': ' + e.message, 'error');
+  }
+}
+
+async function toggleSkill(name, disable) {
+  try {
+    await API.post('/api/skills/toggle', { name, disabled: disable });
+    toast(disable ? t('skills.disabled') : t('skills.enabled'));
+    closeModal();
+    render();
+  } catch(e) {
+    toast((disable ? t('skills.disableFail') : t('skills.enableFail')) + ': ' + e.message, 'error');
+  }
+}
+
+// ==================== CLEANUP ====================
+async function renderCleanup(el) {
+  el.innerHTML = loading();
+  try {
+    const d = await API.get('/api/storage');
+    const targets = [
+      { key: 'cache', label: t('cleanup.cache.label'), desc: t('cleanup.cache.desc') },
+      { key: 'debug', label: t('cleanup.debug.label'), desc: t('cleanup.debug.desc') },
+      { key: 'paste-cache', label: t('cleanup.pasteCache.label'), desc: t('cleanup.pasteCache.desc') },
+      { key: 'file-history', label: t('cleanup.fileHistory.label'), desc: t('cleanup.fileHistory.desc') },
+      { key: 'shell-snapshots', label: t('cleanup.shellSnapshots.label'), desc: t('cleanup.shellSnapshots.desc') },
+      { key: 'session-env', label: t('cleanup.sessionEnv.label'), desc: t('cleanup.sessionEnv.desc') },
+      { key: 'backups', label: t('cleanup.backups.label'), desc: t('cleanup.backups.desc') },
+      { key: 'todos', label: t('cleanup.todos.label'), desc: t('cleanup.todos.desc') },
+    ];
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('cleanup.title')}</h2>
+      <div class="space-y-3">
+        ${targets.map(tg => {
+          const size = d.storage[tg.key] || 0;
+          return `<div class="card !p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" class="cleanup-cb" data-target="${tg.key}" onchange="updateCleanupPreview()" style="accent-color:var(--accent);width:18px;height:18px">
+                <div>
+                  <h4 class="text-sm font-medium">${tg.label}</h4>
+                  <p class="text-xs" style="color:var(--muted)">${tg.desc}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <button class="btn btn-ghost text-xs px-2 py-1" onclick="openFolder('${tg.key}')" title="${t('cleanup.openFolder')}">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                </button>
+                <span class="text-sm font-mono" style="color:${size > 1048576 ? '#fbbf24' : 'var(--muted)'}">${fmtBytes(size)}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="card mt-6" style="border-color:color-mix(in srgb, #fbbf24 20%, transparent);background:color-mix(in srgb, #fbbf24 3%, var(--surface))">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-medium">${t('cleanup.estimated')}</h4>
+            <div class="text-2xl font-bold mt-1" style="color:#fbbf24" id="cleanup-size">0 B</div>
+          </div>
+          <button class="btn px-6 py-2.5 text-white" style="background:#f87171" onclick="executeCleanup()" id="cleanup-btn" disabled>${t('cleanup.execute')}</button>
+        </div>
+      </div>
+    `;
+
+    S.data.cleanupStorage = d.storage;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('cleanup.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+function updateCleanupPreview() {
+  let total = 0;
+  $$('.cleanup-cb:checked').forEach(cb => {
+    total += S.data.cleanupStorage[cb.dataset.target] || 0;
+  });
+  $('#cleanup-size').textContent = fmtBytes(total);
+  $('#cleanup-btn').disabled = total === 0;
+}
+
+async function executeCleanup() {
+  const targets = [...$$('.cleanup-cb:checked')].map(cb => cb.dataset.target);
+  if (targets.length === 0) return;
+  if (!confirm(t('cleanup.confirm'))) return;
+
+  try {
+    await API.post('/api/cleanup/execute', { targets });
+    toast(t('cleanup.done'));
+    render();
+  } catch(e) {
+    toast(t('cleanup.fail') + ': ' + e.message, 'error');
+  }
+}
+
+async function openFolder(relPath) {
+  try {
+    await API.post('/api/open-folder', { path: relPath });
+  } catch(e) {
+    toast(t('cleanup.openFail') + ': ' + e.message, 'error');
+  }
+}
+
+// ==================== SYSTEM ====================
+async function renderSystem(el) {
+  el.innerHTML = loading();
+  try {
+    const [stats, history] = await Promise.all([
+      API.get('/api/stats'),
+      API.get('/api/history'),
+    ]);
+
+    const modelUsage = stats.modelUsage || stats.model_usage || {};
+    const modelEntries = Object.entries(modelUsage).sort((a,b) => (b[1]?.inputTokens||0) - (a[1]?.inputTokens||0));
+
+    el.innerHTML = `
+      <h2 class="text-xl font-semibold mb-6">${t('system.title')}</h2>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('system.modelUsage')}</h3>
+          <div class="space-y-4">
+            ${modelEntries.length > 0 ? modelEntries.map(([name, u]) => {
+              const inp = u.inputTokens || 0;
+              const out = u.outputTokens || 0;
+              const maxT = Math.max(...modelEntries.map(([_,v]) => (v.inputTokens||0) + (v.outputTokens||0)));
+              const pct = maxT > 0 ? ((inp + out) / maxT * 100) : 0;
+              return `<div>
+                <div class="flex items-center justify-between text-sm mb-1.5">
+                  <span class="font-medium">${esc(name)}</span>
+                  <span style="color:var(--muted)">${(inp/1e6).toFixed(1)}M in · ${(out/1e6).toFixed(1)}M out</span>
+                </div>
+                <div class="bar"><div style="width:${pct}%;background:var(--accent)"></div></div>
+              </div>`;
+            }).join('') : `<p class="text-sm" style="color:var(--muted)">${t('system.noData')}</p>`}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('system.activityHours')}</h3>
+          <div class="grid grid-cols-12 gap-1" id="heatmap">
+            ${(() => {
+              const hours = stats.hourCounts || stats.hour_counts || {};
+              const maxH = Math.max(...Object.values(hours), 1);
+              let html = '';
+              for (let h = 0; h < 24; h++) {
+                const count = hours[h] || hours[String(h)] || 0;
+                const opacity = Math.max(count / maxH, 0.05);
+                html += `<div class="aspect-square rounded" style="background:var(--accent);opacity:${opacity}" title="${h}:00 · ${count}"></div>`;
+              }
+              return html;
+            })()}
+          </div>
+          <div class="flex justify-between text-xs mt-2" style="color:var(--muted)">
+            <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('system.dailyStats')}</h3>
+          <div class="grid grid-cols-3 gap-4">
+            ${(() => {
+              const ds = stats.dailyStats || stats.daily_stats || {};
+              const days = Object.entries(ds).sort((a,b) => b[0].localeCompare(a[0])).slice(0, 5);
+              return days.length > 0 ? `<div class="col-span-3 space-y-2">
+                ${days.map(([date, info]) => `
+                  <div class="flex items-center justify-between text-sm p-2 rounded" style="background:var(--elevated)">
+                    <span class="font-mono">${date}</span>
+                    <div class="flex gap-4" style="color:var(--muted)">
+                      <span>${info.messageCount || info.message_count || 0} ${t('system.messages')}</span>
+                      <span>${info.sessionCount || info.session_count || 0} ${t('sessions.sessionCount')}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>` : `<p class="text-sm col-span-3" style="color:var(--muted)">${t('system.noData')}</p>`;
+            })()}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="text-sm font-semibold mb-4" style="color:var(--muted)">${t('system.history')} <span class="font-normal">(${history.total} ${t('system.entries')})</span></h3>
+          <div class="space-y-2 max-h-80 overflow-y-auto">
+            ${(history.entries || []).slice(0, 30).map(h => `
+              <div class="flex items-start gap-3 p-2 rounded" style="background:var(--elevated)">
+                <div class="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style="background:var(--accent)"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm truncate">${esc(h.display || h.query || '-')}</p>
+                  <p class="text-xs" style="color:var(--muted)">${fmtDate(h.timestamp)} · ${esc(h.projectPath || '')}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="card"><p style="color:#f87171">${t('system.loadFail')}: ${esc(e.message)}</p></div>`;
+  }
+}
+
+// ==================== INIT ====================
+function init() {
+  // Apply saved language
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    const val = t(key);
+    if (val !== key) el.textContent = val;
+  });
+  $('#lang-btn').textContent = t('lang.label');
+  applyTheme();
+  navigate('dashboard');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
