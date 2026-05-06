@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC CONFIG UI</title>
+<link rel="icon" href="logo.png" type="image/png">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0b10;
+    --surface: #12131a;
+    --surface-2: #1a1b24;
+    --border: #23242f;
+    --accent: #6c8cff;
+    --accent-dim: rgba(108, 140, 255, 0.12);
+    --text: #e4e6ef;
+    --text-muted: #7c7f94;
+    --green: #4ade80;
+    --purple: #a78bfa;
+    --amber: #fbbf24;
+    --red: #f87171;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- Glow background ---- */
+  .glow {
+    position: fixed; top: -40%; left: -20%; width: 80%; height: 80%;
+    background: radial-gradient(circle, rgba(108,140,255,0.06) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  .glow-2 {
+    position: fixed; bottom: -30%; right: -20%; width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(167,139,250,0.04) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ---- Container ---- */
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ---- Nav ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: rgba(10,11,16,0.8);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1080px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-brand img { width: 28px; height: 28px; border-radius: 6px; }
+  .nav-brand span { font-weight: 700; font-size: 15px; color: var(--text); letter-spacing: -0.3px; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent) !important; color: #fff !important;
+    padding: 6px 16px; border-radius: 8px; font-size: 13px !important;
+    font-weight: 600 !important; transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  /* ---- Hero ---- */
+  .hero { padding: 160px 0 100px; text-align: center; }
+  .hero-logo { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 32px; }
+  .hero h1 {
+    font-size: 56px; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #e4e6ef 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { font-size: 18px; color: var(--text-muted); max-width: 520px; margin: 0 auto 40px; }
+  .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .85; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 500;
+    cursor: pointer; text-decoration: none; transition: border-color .2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  /* ---- Badges ---- */
+  .badges { display: flex; gap: 10px; justify-content: center; margin-top: 48px; flex-wrap: wrap; }
+  .badge {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 14px; font-size: 13px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ---- Screenshot mockup ---- */
+  .screenshot-section { padding: 40px 0 80px; }
+  .screenshot-wrapper {
+    position: relative; max-width: 960px; margin: 0 auto;
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 80px rgba(108,140,255,0.08), 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .screenshot-bar {
+    height: 36px; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 14px; gap: 7px;
+  }
+  .screenshot-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-2); }
+  .screenshot-url {
+    margin-left: 12px; background: var(--surface-2); border-radius: 5px;
+    padding: 3px 12px; font-size: 11px; color: var(--text-muted); font-family: monospace;
+  }
+  .screenshot-body {
+    background: var(--surface);
+    display: grid; grid-template-columns: 200px 1fr; min-height: 400px;
+  }
+  .mock-sidebar {
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 20px 16px;
+  }
+  .mock-sidebar-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+  .mock-sidebar-brand img { width: 20px; height: 20px; border-radius: 4px; }
+  .mock-sidebar-brand span { font-size: 12px; font-weight: 700; }
+  .mock-nav-item {
+    padding: 7px 10px; border-radius: 6px; font-size: 12px; color: var(--text-muted);
+    margin-bottom: 2px; display: flex; align-items: center; gap: 8px;
+  }
+  .mock-nav-item.active { background: var(--accent-dim); color: var(--accent); }
+  .mock-nav-icon { width: 14px; height: 14px; border-radius: 3px; background: currentColor; opacity: .4; }
+  .mock-content { padding: 24px; }
+  .mock-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .mock-stat {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+  }
+  .mock-stat-label { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; }
+  .mock-stat-value { font-size: 20px; font-weight: 700; }
+  .mock-chart {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; height: 160px;
+    display: flex; align-items: flex-end; gap: 6px;
+  }
+  .mock-bar {
+    flex: 1; border-radius: 4px 4px 0 0; min-height: 12px;
+  }
+
+  /* ---- Features ---- */
+  .features { padding: 100px 0; }
+  .section-label {
+    text-align: center; font-size: 13px; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+  }
+  .section-title {
+    text-align: center; font-size: 36px; font-weight: 700; letter-spacing: -0.8px;
+    margin-bottom: 60px;
+  }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px;
+    transition: border-color .3s, transform .3s;
+  }
+  .feature-card:hover { border-color: rgba(108,140,255,0.3); transform: translateY(-2px); }
+  .feature-icon {
+    width: 40px; height: 40px; border-radius: 10px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ---- Quick Start ---- */
+  .quickstart { padding: 100px 0; }
+  .code-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; max-width: 640px; margin: 0 auto;
+  }
+  .code-header {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted);
+  }
+  .code-header-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .code-body {
+    padding: 20px 24px; font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px; line-height: 2;
+  }
+  .code-body .cmd { color: var(--green); }
+  .code-body .comment { color: var(--text-muted); }
+  .code-body .prompt { color: var(--accent); user-select: none; }
+  .code-body .url { color: var(--amber); }
+
+  /* ---- Tech stack ---- */
+  .tech { padding: 80px 0; }
+  .tech-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+  .tech-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 22px; font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ---- Footer ---- */
+  footer {
+    border-top: 1px solid var(--border); padding: 40px 0;
+    text-align: center; color: var(--text-muted); font-size: 13px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 36px; }
+    .hero p { font-size: 16px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .screenshot-body { grid-template-columns: 1fr; }
+    .mock-sidebar { display: none; }
+    .mock-stat-row { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { gap: 16px; }
+  }
+
+  /* ---- Animations ---- */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp .6s ease-out both; }
+  .delay-1 { animation-delay: .1s; }
+  .delay-2 { animation-delay: .2s; }
+  .delay-3 { animation-delay: .3s; }
+  .delay-4 { animation-delay: .4s; }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="glow-2"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <img src="logo.png" alt="CC">
+      <span>CC CONFIG UI</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#quickstart">Quick Start</a>
+      <a href="https://github.com/ryan11njr/cc-config-ui" class="nav-cta" target="_blank">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <img src="logo.png" alt="CC CONFIG UI" class="hero-logo fade-up">
+    <h1 class="fade-up delay-1">CC CONFIG UI</h1>
+    <p class="fade-up delay-2">A lightweight, zero-dependency web UI for managing your Claude Code configuration. One Python file, one HTML file, clone and run.</p>
+    <div class="hero-buttons fade-up delay-3">
+      <a href="#quickstart" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Get Started
+      </a>
+      <a href="https://github.com/ryan11njr/cc-config-ui" target="_blank" class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        View Source
+      </a>
+    </div>
+    <div class="badges fade-up delay-4">
+      <div class="badge"><div class="badge-dot" style="background:var(--green)"></div>Zero Dependencies</div>
+      <div class="badge"><div class="badge-dot" style="background:var(--purple)"></div>Python 3.7+</div>
+      <div class="badge"><div class="badge-dot" style="background:var(--accent)"></div>Cross-Platform</div>
+      <div class="badge"><div class="badge-dot" style="background:var(--amber)"></div>MIT License</div>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshot Mockup -->
+<section class="screenshot-section">
+  <div class="container">
+    <div class="screenshot-wrapper">
+      <div class="screenshot-bar">
+        <div class="screenshot-dot" style="background:#f87171"></div>
+        <div class="screenshot-dot" style="background:#fbbf24"></div>
+        <div class="screenshot-dot" style="background:#4ade80"></div>
+        <div class="screenshot-url">127.0.0.1:8787</div>
+      </div>
+      <div class="screenshot-body">
+        <div class="mock-sidebar">
+          <div class="mock-sidebar-brand">
+            <img src="logo.png" alt="CC">
+            <span>CC CONFIG UI</span>
+          </div>
+          <div class="mock-nav-item active"><div class="mock-nav-icon"></div> Dashboard</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Plugins</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Sessions</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Config</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> MCP</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Skills</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> Cleanup</div>
+          <div class="mock-nav-item"><div class="mock-nav-icon"></div> System</div>
+        </div>
+        <div class="mock-content">
+          <div class="mock-stat-row">
+            <div class="mock-stat">
+              <div class="mock-stat-label">PLUGINS</div>
+              <div class="mock-stat-value" style="color:var(--accent)">37</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">SESSIONS</div>
+              <div class="mock-stat-value" style="color:var(--green)">39</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">SKILLS</div>
+              <div class="mock-stat-value" style="color:var(--purple)">92</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">STORAGE</div>
+              <div class="mock-stat-value" style="color:var(--amber)">915<span style="font-size:12px">MB</span></div>
+            </div>
+          </div>
+          <div class="mock-chart">
+            <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.7"></div>
+            <div class="mock-bar" style="height:65%;background:var(--accent);opacity:.8"></div>
+            <div class="mock-bar" style="height:45%;background:var(--accent);opacity:.6"></div>
+            <div class="mock-bar" style="height:80%;background:var(--accent);opacity:.9"></div>
+            <div class="mock-bar" style="height:55%;background:var(--accent);opacity:.7"></div>
+            <div class="mock-bar" style="height:90%;background:var(--accent)"></div>
+            <div class="mock-bar" style="height:70%;background:var(--accent);opacity:.8"></div>
+            <div class="mock-bar" style="height:50%;background:var(--accent);opacity:.65"></div>
+            <div class="mock-bar" style="height:75%;background:var(--accent);opacity:.85"></div>
+            <div class="mock-bar" style="height:60%;background:var(--accent);opacity:.75"></div>
+            <div class="mock-bar" style="height:85%;background:var(--accent);opacity:.9"></div>
+            <div class="mock-bar" style="height:40%;background:var(--accent);opacity:.6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to manage Claude Code</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(108,140,255,.1);color:var(--accent)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3>Dashboard</h3>
+        <p>Overview stats, storage breakdown, recent activity timeline, and config summary at a glance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <h3>Plugin Manager</h3>
+        <p>Enable, disable, view docs, or uninstall plugins. Grouped by source with search filtering.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(74,222,128,.1);color:var(--green)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <h3>Session Manager</h3>
+        <p>Browse conversations, rename sessions, read full content with message bubbles, and copy resume commands.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(251,191,36,.1);color:var(--amber)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+        <h3>Config Editor</h3>
+        <p>Edit settings.json, CLAUDE.md, and permissions directly in the browser with structured forms.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(248,113,113,.1);color:var(--red)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </div>
+        <h3>MCP Servers</h3>
+        <p>View, enable/disable, and delete MCP servers across all plugins. See type, URL, and auth status.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(108,140,255,.1);color:var(--accent)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h3>Skills Browser</h3>
+        <p>Manage installed skills with enable/disable/delete. Browse the marketplace with install status indicators.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(74,222,128,.1);color:var(--green)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        </div>
+        <h3>Cleanup Tool</h3>
+        <p>Free disk space with selective cleanup. Open folders in file explorer for manual management.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(251,191,36,.1);color:var(--amber)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        </div>
+        <h3>System Info</h3>
+        <p>Token usage by model, 24-hour activity heatmap, daily statistics, and full usage history.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <h3>i18n & Themes</h3>
+        <p>Full English and Chinese support with one-click switch. Dark mode (default) and light mode toggle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Start -->
+<section class="quickstart" id="quickstart">
+  <div class="container">
+    <div class="section-label">Quick Start</div>
+    <h2 class="section-title">Up and running in 30 seconds</h2>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-dot" style="background:var(--green)"></div>
+        <div class="code-header-dot" style="background:var(--amber)"></div>
+        <div class="code-header-dot" style="background:var(--red)"></div>
+        <span style="margin-left:8px">Terminal</span>
+      </div>
+      <div class="code-body">
+        <div><span class="prompt">$ </span><span class="cmd">git clone https://github.com/ryan11njr/cc-config-ui.git</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">cd cc-config-ui</span></div>
+        <div><span class="prompt">$ </span><span class="cmd">python server.py</span></div>
+        <div style="margin-top:4px"><span class="comment"># Open http://127.0.0.1:8787 in your browser</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech -->
+<section class="tech">
+  <div class="container">
+    <div class="section-label">Built With</div>
+    <h2 class="section-title">Zero dependencies by design</h2>
+    <div class="tech-grid">
+      <div class="tech-item"><div class="tech-dot" style="background:var(--accent)"></div> Python stdlib only</div>
+      <div class="tech-item"><div class="tech-dot" style="background:var(--green)"></div> Tailwind CSS CDN</div>
+      <div class="tech-item"><div class="tech-dot" style="background:var(--purple)"></div> Vanilla JavaScript</div>
+      <div class="tech-item"><div class="tech-dot" style="background:var(--amber)"></div> http.server</div>
+      <div class="tech-item"><div class="tech-dot" style="background:var(--red)"></div> No npm / pip</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom:8px">Open source under the <a href="https://opensource.org/licenses/MIT">MIT License</a></p>
+    <p>Built for the <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> community</p>
+  </div>
+</footer>
+
+</body>
+</html>
